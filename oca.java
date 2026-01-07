@@ -19,6 +19,30 @@ public class oca {
         String[] nomsJugadors = jugadors();
         
         ordre(nomsJugadors);
+
+        int [] casella = new int [nomsJugadors.length];
+
+        
+        boolean finalJoc = false;
+        if (casella[0] == 63 || casella[1] == 63 || casella[2] == 63 || casella[3] == 63) {
+            
+            finalJoc = true;
+        }
+        
+
+        while (!finalJoc) {
+
+            int [] torn = new int [nomsJugadors.length];
+
+            
+        }
+
+        System.out.println();
+        System.out.println("El jugador " + nomsJugadors[0] + " ha guanyat la partida!");
+        System.out.println();
+        System.out.println("**************************************************");
+        System.out.println("*                 Fi del Joc!                    *");
+        System.out.println("**************************************************");
         
     }
 
@@ -57,20 +81,37 @@ public class oca {
 
     public void ordre(String[] nomsJugadors) {
 
-    System.out.println();
-    System.out.println("**************************************************");
-    System.out.println("L'ordre que s'ha definit aleatòriament és :");
+        System.out.println();
+        System.out.println("**************************************************");
+        System.out.println("L'ordre que s'ha definit aleatòriament és :");
 
-    for (int i = 0; i < nomsJugadors.length; i++) {
-        int aleatori = (int)(Math.random() * nomsJugadors.length);
+        for (int i = 0; i < nomsJugadors.length; i++) {
+            int aleatori = (int)(Math.random() * nomsJugadors.length);
 
-        String jugador = nomsJugadors[i];
-        nomsJugadors[i] = nomsJugadors[aleatori];
-        nomsJugadors[aleatori] = jugador;
+            String jugador = nomsJugadors[i];
+            nomsJugadors[i] = nomsJugadors[aleatori];
+            nomsJugadors[aleatori] = jugador;
+        }
+ 
+        for (int i = 0; i < nomsJugadors.length; i++) {
+            System.out.println((i + 1) + ". " + nomsJugadors[i]);
+        }
     }
 
-    for (int i = 0; i < nomsJugadors.length; i++) {
-        System.out.println((i + 1) + ". " + nomsJugadors[i]);
+    public int tirarDau() {
+
+        int tirada1 = (int)(Math.random() * 6) + 1;
+
+        int tirada2 = (int)(Math.random() * 6) + 1;
+
+        System.out.println("Has tret un " + tirada1 + " i un " + tirada2 + ".");
+        
+        return tirada1 + tirada2;
     }
-}
+
+    public void primerTorn() {
+
+
+        
+    }
 }
