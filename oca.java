@@ -58,25 +58,14 @@ public class oca {
 
     public String[] jugadors() {
 
-        int numeroJugadors;
-
-        do {
-            System.out.print("Introdueix el nombre de jugadors (2 - 4): ");
-            numeroJugadors = e.nextInt();
-            e.nextLine();
-
-            if (numeroJugadors < 2 || numeroJugadors > 4) {
-                System.out.println("El nombre de jugadors ha de ser entre 2 i 4.");
-            }
-
-        } while (numeroJugadors < 2 || numeroJugadors > 4);
+        int numeroJugadors = llegirNumeroJugadors();
 
         String[] nomsJugadors = new String[numeroJugadors];
 
         for (int i = 0; i < numeroJugadors; i++) {
-            System.out.print("Introdueix el nom del jugador " + (i + 1) + ": ");
-            nomsJugadors[i] = e.nextLine();
+        nomsJugadors[i] = llegirNomJugadors(i + 1);
         }
+        
 
         System.out.println();
         System.out.println("**************************************************");
@@ -156,29 +145,29 @@ public class oca {
 
     System.out.println("El jugador " + nomsJugadors[jugadorActual] + " està a la casella " + casella[jugadorActual]);
 
-    boolean primeraTirada = true;
-    boolean repetir = false;
+    boolean repetir = gestionarCasellaEspecial(jugadorActual, casella, penalitzacio, casella, true);
 
-    if (gestioOca(jugadorActual, casella)) repetir = true;
-    else if (gestioPont(jugadorActual, casella)) repetir = true;
-    else if (casella[jugadorActual] == 19) gestioFonda(jugadorActual, penalitzacio);
-    else if (casella[jugadorActual] == 31) gestioPou(jugadorActual, casella, penalitzacio, casella);
-    else if (casella[jugadorActual] == 52) gestioPreso(jugadorActual, penalitzacio);
-    else if (primeraTirada && casella[jugadorActual] == 26) System.out.println("Daus 3-6: avança a la casella 26 i torna a tirar.");
-    else if (primeraTirada && casella[jugadorActual] == 53) System.out.println("Daus 4-5: avança a la casella 53 i torna a tirar.");
-    else if (casella[jugadorActual] == 42) gestioLaberint(jugadorActual, casella);
-    else if (casella[jugadorActual] == 58) gestioMort(jugadorActual, casella);
-
-    return repetir || casella[jugadorActual] == 63;
+    return repetir || casella[jugadorActual] == 63; 
     }
 
     public boolean gestionarCasellaEspecial(int jugadorActual, int[] casella, int[] penalitzacio, int[] posicionsJugadors, boolean primeraTirada) {
     boolean repetir = false;
-    if (gestioOca(jugadorActual, casella)) repetir = true;
-    if (gestioPont(jugadorActual, casella)) repetir = true;
-    if (casella[jugadorActual] == 19) gestioFonda(jugadorActual, penalitzacio);
-    if (casella[jugadorActual] == 31) gestioPou(jugadorActual, casella, penalitzacio, posicionsJugadors);
-    if (casella[jugadorActual] == 52) gestioPreso(jugadorActual, penalitzacio);
+    
+    if (gestioOca(jugadorActual, casella)) {
+        repetir = true;
+    }
+    if (gestioPont(jugadorActual, casella)) {
+        repetir = true;
+    }
+    if (casella[jugadorActual] == 19) {
+        gestioFonda(jugadorActual, penalitzacio);
+    }
+    if (casella[jugadorActual] == 31) {
+        gestioPou(jugadorActual, casella, penalitzacio);
+    }
+    if (casella[jugadorActual] == 52) {
+        gestioPreso(jugadorActual, penalitzacio);
+    }
     if (primeraTirada && casella[jugadorActual] == 26) {
         System.out.println("Daus 3-6: avança a la casella 26 i torna a tirar.");
         repetir = true;
@@ -199,7 +188,7 @@ public class oca {
                 if (i + 1 < oques.length) {
                     casella[jugadorActual] = oques[i + 1];
                     System.out.println("De oca en oca i tiro perquè em toca.");
-                    return true; // Només una repetició
+                    return true;
                 } else {
                     System.out.println("Última oca, no es torna a tirar.");
                     return false;
@@ -228,16 +217,16 @@ public class oca {
     penalitzacio[jugadorActual] = 1;
     }
 
-    public void gestioPou(int jugadorActual, int[] casella, int[] penalitzacio, int[] posicionsJugadors) {
+    public void gestioPou(int jugadorActual, int[] casella, int[] penalitzacio) {
     System.out.println("Pou: perds dos torns.");
     penalitzacio[jugadorActual] = 2;
-        for (int i = 0; i < posicionsJugadors.length; i++) {
+        for (int i = 0; i < casella.length; i++) {
             if (i != jugadorActual && casella[i] == 31) {
                 System.out.println("Un altre jugador estava al pou: surt immediatament!");
                 penalitzacio[i] = 0;
             }
         }
-    }   
+    }  
 
     public void gestioPreso(int jugadorActual, int[] penalitzacio) {
     System.out.println("Presó: perds tres torns.");
@@ -265,5 +254,50 @@ public class oca {
             System.out.println("La Mort: torna a la casella inicial.");
             casella[jugadorActual] = 0;
         }
+    }
+
+    public int llegirNumeroJugadors() {
+    int numeroJugadors = 0;
+    boolean valid = false;
+
+    while (!valid) {
+        System.out.print("Introdueix el nombre de jugadors (2 - 4): ");
+        String entrada = e.nextLine();
+
+        try {
+            numeroJugadors = Integer.parseInt(entrada);
+
+            if (numeroJugadors >= 2 && numeroJugadors <= 4) {
+                valid = true;
+            } else {
+                System.out.println("El nombre de jugadors ha de ser entre 2 i 4.");
+            }
+
+        } catch (NumberFormatException ex) {
+            System.out.println("Entrada no vàlida. Introdueix un número.");
+        }
+    }
+    return numeroJugadors;
+
+    }
+
+    
+    public String llegirNomJugadors(int numeroJugador) {
+    String nom;
+    boolean valid = false;
+
+    while (!valid) {
+        System.out.print("Introdueix el nom del jugador " + numeroJugador + ": ");
+        nom = e.nextLine().trim();
+
+
+        if (!nom.isEmpty() && !nom.matches(".*\\d.*")) {
+            valid = true;
+            return nom;
+        } else {
+            System.out.println("Nom invàlid. No pot estar buit ni contenir números.");
+        }
+    }
+    return "";
     }
 }
