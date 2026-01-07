@@ -27,21 +27,33 @@ public class oca {
         boolean finalJoc = false;
 
         while (!finalJoc) {
+            boolean repetir = tornJugador(jugadorActual, nomsJugadors, casella, penalitzacio);
 
-        finalJoc = tornJugador(jugadorActual, nomsJugadors, casella, penalitzacio);
-
-        jugadorActual = (jugadorActual + 1) % nomsJugadors.length;
+            if (casella[jugadorActual] == 63) {
+                finalJoc = true;
+            } else if (!repetir) {
+                
+                jugadorActual = (jugadorActual + 1) % nomsJugadors.length;
+            }
+        }
         System.out.println("**************************************************");
-        
+
+        int guanyador = -1;
+        for (int i = 0; i < casella.length; i++) {
+            if (casella[i] == 63) {
+                guanyador = i;
+                break;
+            }
         }
 
-        System.out.println();
-        System.out.println("El jugador " + nomsJugadors[0] + " ha guanyat la partida!");
-        System.out.println();
-        System.out.println("**************************************************");
-        System.out.println("*                 Fi del Joc!                    *");
-        System.out.println("**************************************************");
-        
+        if (guanyador != -1) {
+            System.out.println();
+            System.out.println("El jugador " + nomsJugadors[guanyador] + " ha guanyat la partida!");
+            System.out.println();
+            System.out.println("**************************************************");
+            System.out.println("*                 Fi del Joc!                    *");
+            System.out.println("**************************************************");
+        }
     }
 
     public String[] jugadors() {
@@ -122,7 +134,7 @@ public class oca {
 
     System.out.println();
     System.out.println("És el torn del jugador " + (jugadorActual + 1) + ", " + nomsJugadors[jugadorActual]);
-    System.out.print(">> tiro");
+    System.out.print(">> tirar daus (Enter)");
     e.nextLine();
 
     int[] daus = tirarDausSegonsCasella(casella[jugadorActual]);
@@ -142,6 +154,116 @@ public class oca {
         casella[jugadorActual] = 63 - (casella[jugadorActual] - 63);
     }
 
-    return casella[jugadorActual] == 63;
+    System.out.println("El jugador " + nomsJugadors[jugadorActual] + " està a la casella " + casella[jugadorActual]);
+
+    boolean primeraTirada = true;
+    boolean repetir = false;
+
+    if (gestioOca(jugadorActual, casella)) repetir = true;
+    else if (gestioPont(jugadorActual, casella)) repetir = true;
+    else if (casella[jugadorActual] == 19) gestioFonda(jugadorActual, penalitzacio);
+    else if (casella[jugadorActual] == 31) gestioPou(jugadorActual, casella, penalitzacio, casella);
+    else if (casella[jugadorActual] == 52) gestioPreso(jugadorActual, penalitzacio);
+    else if (primeraTirada && casella[jugadorActual] == 26) System.out.println("Daus 3-6: avança a la casella 26 i torna a tirar.");
+    else if (primeraTirada && casella[jugadorActual] == 53) System.out.println("Daus 4-5: avança a la casella 53 i torna a tirar.");
+    else if (casella[jugadorActual] == 42) gestioLaberint(jugadorActual, casella);
+    else if (casella[jugadorActual] == 58) gestioMort(jugadorActual, casella);
+
+    return repetir || casella[jugadorActual] == 63;
+    }
+
+    public boolean gestionarCasellaEspecial(int jugadorActual, int[] casella, int[] penalitzacio, int[] posicionsJugadors, boolean primeraTirada) {
+    boolean repetir = false;
+    if (gestioOca(jugadorActual, casella)) repetir = true;
+    if (gestioPont(jugadorActual, casella)) repetir = true;
+    if (casella[jugadorActual] == 19) gestioFonda(jugadorActual, penalitzacio);
+    if (casella[jugadorActual] == 31) gestioPou(jugadorActual, casella, penalitzacio, posicionsJugadors);
+    if (casella[jugadorActual] == 52) gestioPreso(jugadorActual, penalitzacio);
+    if (primeraTirada && casella[jugadorActual] == 26) {
+        System.out.println("Daus 3-6: avança a la casella 26 i torna a tirar.");
+        repetir = true;
+    }
+    if (primeraTirada && casella[jugadorActual] == 53) {
+        System.out.println("Daus 4-5: avança a la casella 53 i torna a tirar.");
+        repetir = true;
+    }
+    if (casella[jugadorActual] == 42) gestioLaberint(jugadorActual, casella);
+    if (casella[jugadorActual] == 58) gestioMort(jugadorActual, casella);
+    return repetir;
+}
+
+    public boolean gestioOca(int jugadorActual, int[] casella) {
+    int[] oques = {5, 9, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59};
+        for (int i = 0; i < oques.length; i++) {
+            if (casella[jugadorActual] == oques[i]) {
+                if (i + 1 < oques.length) {
+                    casella[jugadorActual] = oques[i + 1];
+                    System.out.println("De oca en oca i tiro perquè em toca.");
+                    return true; // Només una repetició
+                } else {
+                    System.out.println("Última oca, no es torna a tirar.");
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    public boolean gestioPont(int jugadorActual, int[] casella) {
+        if (casella[jugadorActual] == 6) {
+            casella[jugadorActual] = 12;
+            System.out.println("De pont a pont i tiro perquè em porta la corrent.");
+            return true; 
+        } else if (casella[jugadorActual] == 12) {
+            casella[jugadorActual] = 6;
+            System.out.println("De pont a pont i tiro perquè em porta la corrent.");
+            return true; 
+        }
+        return false;
+    }   
+
+    public void gestioFonda(int jugadorActual, int[] penalitzacio) {
+    System.out.println("Fonda: perds un torn.");
+    penalitzacio[jugadorActual] = 1;
+    }
+
+    public void gestioPou(int jugadorActual, int[] casella, int[] penalitzacio, int[] posicionsJugadors) {
+    System.out.println("Pou: perds dos torns.");
+    penalitzacio[jugadorActual] = 2;
+        for (int i = 0; i < posicionsJugadors.length; i++) {
+            if (i != jugadorActual && casella[i] == 31) {
+                System.out.println("Un altre jugador estava al pou: surt immediatament!");
+                penalitzacio[i] = 0;
+            }
+        }
+    }   
+
+    public void gestioPreso(int jugadorActual, int[] penalitzacio) {
+    System.out.println("Presó: perds tres torns.");
+    penalitzacio[jugadorActual] = 3;
+    }
+
+    public void gestioLaberint(int jugadorActual, int[] casella) {
+        if (casella[jugadorActual] == 42) {
+            System.out.println("Laberint: torna a la casella 39.");
+            casella[jugadorActual] = 39;
+        }
+    }   
+
+    public boolean gestioDaus45(int jugadorActual, int[] casella) {
+        if (casella[jugadorActual] == 53) {
+            System.out.println("Daus 4-5: avança a la casella 53 i torna a tirar.");
+            return true;
+        }
+        return false;
+    }
+
+
+    public void gestioMort(int jugadorActual, int[] casella) {
+        if (casella[jugadorActual] == 58) {
+            System.out.println("La Mort: torna a la casella inicial.");
+            casella[jugadorActual] = 0;
+        }
     }
 }
